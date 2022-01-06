@@ -1,10 +1,10 @@
 // MCA.cpp : This file contains the 'main' function. Program execution begins and ends there.
 //
+#include "UnityServer.h"
 
-#include "MCA.h"
-int main()
+void UnityServer::GetInputMotionDataFromUnity()
 {
-    //Global Variables
+    
     SOCKET s;
     struct sockaddr_in server, si_other;
     int slen, recv_len;
@@ -13,14 +13,12 @@ int main()
 
     slen = sizeof(si_other);
     float MotionData[BUFLEN / 4];
-
-
-    
-    InitializeWinsock(wsa);//Initialise winsock   
-    CreateAndPrepareSocket(s, server);//Create a socket
+        
+    UnityServer::InitializeWinsock(wsa);//Initialise winsock   
+    UnityServer::CreateAndPrepareSocket(s, server);//Create a socket
 
     //Bind
-    BindSocket(s, server);
+    UnityServer::BindSocket(s, server);
 
     //keep listening for data
     while (1)
@@ -54,8 +52,6 @@ int main()
             printf("%f, ", a);
         }
        
-
-
        // printf("Data: %s\n", buf);
 
         ////now reply the client with the same data
@@ -68,11 +64,9 @@ int main()
 
     closesocket(s); //close socket
     WSACleanup(); //shutdown socket
-
-    return 0;
 }
 
-void BindSocket(const SOCKET& s, sockaddr_in& server)
+void UnityServer::BindSocket(const SOCKET& s, sockaddr_in& server)
 {
     if (bind(s, (struct sockaddr*)&server, sizeof(server)) == SOCKET_ERROR)
     {
@@ -82,7 +76,7 @@ void BindSocket(const SOCKET& s, sockaddr_in& server)
     puts("Bind done");
 }
 
-void CreateAndPrepareSocket(SOCKET& s, sockaddr_in& server)
+void UnityServer::CreateAndPrepareSocket(SOCKET& s, sockaddr_in& server)
 {
     if ((s = socket(AF_INET, SOCK_DGRAM, 0)) == INVALID_SOCKET)
     {
@@ -96,7 +90,7 @@ void CreateAndPrepareSocket(SOCKET& s, sockaddr_in& server)
     server.sin_port = htons(PORT);
 }
 
-void InitializeWinsock(WSADATA& wsa)
+void UnityServer::InitializeWinsock(WSADATA& wsa)
 {
     printf("\nInitialising Winsock...");
     if (WSAStartup(MAKEWORD(2, 2), &wsa) != 0)
@@ -107,14 +101,14 @@ void InitializeWinsock(WSADATA& wsa)
     printf("Initialised.\n");
 }
 
-void DeserializeRecvData(float*  floatArray, char* byteArray)
+void UnityServer::DeserializeRecvData(float* floatArray, char* byteArray)
 {
     int itr = 0;
     for (int i = 0; i < BUFLEN; i += 4)
     {
         if (itr< BUFLEN / 4)
         {
-            floatArray[itr] = BytesToFloat(byteArray[i], byteArray[i + 1], byteArray[i + 2], byteArray[i + 3]);
+            floatArray[itr] = UnityServer::BytesToFloat(byteArray[i], byteArray[i + 1], byteArray[i + 2], byteArray[i + 3]);
             itr++;
         }
     }
@@ -127,7 +121,7 @@ void DeserializeRecvData(float*  floatArray, char* byteArray)
 }
 
 
-float BytesToFloat(char b0, char b1, char b2, char b3)
+float UnityServer::BytesToFloat(char b0, char b1, char b2, char b3)
 {
    // char byte_array[] = { b3, b2, b1, b0 };
     char byte_array[] = { b0, b1, b2, b3 };
