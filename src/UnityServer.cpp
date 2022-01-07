@@ -2,17 +2,18 @@
 //
 #include "UnityServer.h"
 
-void UnityServer::GetInputMotionDataFromUnity()
+void UnityServer::GetInputMotionDataFromUnity(float *MotionData, bool*isDataRecv, std::shared_mutex& m_mu, std::condition_variable_any& m_cond)
 {
-    
+    std::cout << "In Get Input\n";
     SOCKET s;
     struct sockaddr_in server, si_other;
     int slen, recv_len;
     char buf[BUFLEN];
     WSADATA wsa;
+    std::mutex _mtx;
 
     slen = sizeof(si_other);
-    float MotionData[BUFLEN / 4];
+   // float MotionData[BUFLEN / 4];
         
     UnityServer::InitializeWinsock(wsa);//Initialise winsock   
     UnityServer::CreateAndPrepareSocket(s, server);//Create a socket
@@ -23,6 +24,9 @@ void UnityServer::GetInputMotionDataFromUnity()
     //keep listening for data
     while (1)
     {
+        //*isDataRecv = false;
+        std::cout << "\nIn Get Input LOOP\n";
+        
         ZeroMemory(buf, BUFLEN);
         //printf("Waiting for data...");
         fflush(stdout);
@@ -30,27 +34,35 @@ void UnityServer::GetInputMotionDataFromUnity()
         //clear the buffer by filling null, it might have previously received data
         memset(buf, '\0', BUFLEN);
 
+        
+        std::unique_lock<std::shared_mutex> lock(m_mu);
         //try to receive some data, this is a blocking call
         if ((recv_len = recvfrom(s, buf, BUFLEN, 0, (struct sockaddr*)&si_other, &slen)) == SOCKET_ERROR)
         {
             printf("recvfrom() failed with error code : %d", WSAGetLastError());
+            *isDataRecv = false;
             exit(EXIT_FAILURE);
         }
 
-        //print details of the client/peer and the data received
-        char clientIp[BUFLEN];
-        ZeroMemory(clientIp, BUFLEN);
-        inet_ntop(AF_INET, &si_other.sin_addr, clientIp, BUFLEN);
-       //printf("Received packet from %s:%d\n", clientIp, ntohs(si_other.sin_port));
+       // //print details of the client/peer and the data received
+       // char clientIp[BUFLEN];
+       // ZeroMemory(clientIp, BUFLEN);
+       // inet_ntop(AF_INET, &si_other.sin_addr, clientIp, BUFLEN);
+       ////printf("Received packet from %s:%d\n", clientIp, ntohs(si_other.sin_port));
+
         
         DeserializeRecvData(MotionData, buf);
+        *isDataRecv = true;
+        lock.unlock();
+        m_cond.notify_one();
+
 
         //Print Motion Data
-        printf("\n");
+       /* printf("\n");
         for (float a:MotionData)
         {
             printf("%f, ", a);
-        }
+        }*/
        
        // printf("Data: %s\n", buf);
 

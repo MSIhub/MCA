@@ -17,6 +17,9 @@
 #include <ws2tcpip.h>
 #include <stdio.h>
 #include <iostream>
+#include <thread>
+#include <condition_variable>
+#include <shared_mutex>
 
 #pragma comment(lib, "Ws2_32.lib")
 
@@ -25,8 +28,9 @@ namespace UnityServer
 	#define BUFLEN 52	//Max length of buffer
 	#define PORT 23456
 
+
 	//functions
-	void GetInputMotionDataFromUnity();
+	void GetInputMotionDataFromUnity(float *, bool*, std::shared_mutex&, std::condition_variable_any&);
 	float BytesToFloat(char, char, char, char);
 	void DeserializeRecvData(float*, char*);
 	void InitializeWinsock(WSADATA& wsa);
