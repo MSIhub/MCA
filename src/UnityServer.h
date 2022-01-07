@@ -19,7 +19,6 @@
 #include <iostream>
 #include <thread>
 #include <condition_variable>
-#include <shared_mutex>
 
 #pragma comment(lib, "Ws2_32.lib")
 
@@ -30,7 +29,7 @@ namespace UnityServer
 
 
 	//functions
-	void GetInputMotionDataFromUnity(float *, bool*, std::shared_mutex&, std::condition_variable_any&);
+	void GetInputMotionDataFromUnity(float *, bool*, std::mutex&, std::condition_variable&);
 	float BytesToFloat(char, char, char, char);
 	void DeserializeRecvData(float*, char*);
 	void InitializeWinsock(WSADATA& wsa);

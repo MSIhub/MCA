@@ -2,15 +2,15 @@
 #include <thread>
 #include <condition_variable>
 #include <chrono>
-#include <shared_mutex>
+
 #include "UnityServer.h"
 
 int main()
 {
 	//prefix g_ for global variables	
 	float g_motion_data[BUFLEN / 4];
-	std::shared_mutex mtx;
-	std::condition_variable_any cond;
+	std::mutex mtx;
+	std::condition_variable cond;
 
 	bool isDataReceived = false;
 
@@ -18,14 +18,14 @@ int main()
 	while (1) {
 		//std::this_thread::sleep_for(std::chrono::milliseconds(2));
 		std::cout<< "\nIn print loop" << std::endl;
-		std::unique_lock<std::shared_mutex> lock(mtx);
-		while (!isDataReceived)
+		std::unique_lock<std::mutex> lock(mtx);
+		/*while (!isDataReceived)
 		{
 			cond.wait(lock);
 			
-		}
-		/*cond.wait(lock, [&]()
-			{ return isDataReceived; });*/
+		}*/
+		cond.wait(lock, [&]()
+			{ return isDataReceived; });
 		printf("\n");
 		for (auto md : g_motion_data)
 		{

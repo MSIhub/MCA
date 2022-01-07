@@ -2,7 +2,7 @@
 //
 #include "UnityServer.h"
 
-void UnityServer::GetInputMotionDataFromUnity(float *MotionData, bool*isDataRecv, std::shared_mutex& m_mu, std::condition_variable_any& m_cond)
+void UnityServer::GetInputMotionDataFromUnity(float *MotionData, bool*isDataRecv, std::mutex& m_mu, std::condition_variable& m_cond)
 {
     std::cout << "In Get Input\n";
     SOCKET s;
@@ -35,7 +35,7 @@ void UnityServer::GetInputMotionDataFromUnity(float *MotionData, bool*isDataRecv
         memset(buf, '\0', BUFLEN);
 
         
-        std::unique_lock<std::shared_mutex> lock(m_mu);
+        std::unique_lock<std::mutex> lock(m_mu);
         //try to receive some data, this is a blocking call
         if ((recv_len = recvfrom(s, buf, BUFLEN, 0, (struct sockaddr*)&si_other, &slen)) == SOCKET_ERROR)
         {
@@ -56,14 +56,6 @@ void UnityServer::GetInputMotionDataFromUnity(float *MotionData, bool*isDataRecv
         lock.unlock();
         m_cond.notify_one();
 
-
-        //Print Motion Data
-       /* printf("\n");
-        for (float a:MotionData)
-        {
-            printf("%f, ", a);
-        }*/
-       
        // printf("Data: %s\n", buf);
 
         ////now reply the client with the same data
