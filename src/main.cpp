@@ -5,6 +5,9 @@
 #include <iomanip>//setprecision
 //#include <shared_mutex>
 #include "UnityServer.h"
+#include "Cueing.h"
+
+
 
 int main()
 {
@@ -16,30 +19,7 @@ int main()
 	std::atomic<bool> isDataReceived{ false };
 
 	std::thread data_input_thread(UnityServer::GetInputMotionDataFromUnity, &g_motion_data[0], std::ref(isDataReceived), std::ref(mtx), std::ref(cond));
-	std::thread cue_theard([&](){
-		while (true)
-		{
-			std::unique_lock<std::mutex> lock(mtx);
-			while (!isDataReceived)
-			{
-				cond.wait(lock);
-			}			
-			if (isDataReceived)
-			{
-				printf("\n");
-				for (auto md : g_motion_data)
-				{
-					printf("%f, ", md);
-				}
-			}			
-			isDataReceived = false;
-			lock.unlock();
-			std::this_thread::sleep_for(std::chrono::milliseconds(1));
-		}
-	});
-	
-	
-	
+	std::thread cue_theard(Cueing::CueingTest, &g_motion_data[0], std::ref(isDataReceived), std::ref(mtx), std::ref(cond));
 
 	data_input_thread.join();
 	cue_theard.join();
