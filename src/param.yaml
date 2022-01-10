@@ -1,0 +1,7 @@
+#scaling paramters
+k_ax: 0.01
+k_ay: 0.01
+k_az: 0.01
+k_aroll: 0.01
+k_apitch: 0.01
+k_ayaw: 0.01

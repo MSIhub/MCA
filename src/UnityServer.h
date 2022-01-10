@@ -9,7 +9,6 @@
 namespace UnityServer
 {
 	//function
-	//void GetInputMotionDataFromUnity(float *, std::atomic<bool>&, std::mutex&, std::condition_variable&);
 	void GetInputMotionDataFromUnity(DataTheard&);
 	float BytesToFloat(char, char, char, char);
 	void DeserializeRecvData(float*, char*);

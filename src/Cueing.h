@@ -1,5 +1,5 @@
 /*
- * UnityServer.hpp
+ * Cueing.hpp
  *
  */
 #pragma once
@@ -9,6 +9,7 @@
 namespace Cueing
 {
 	//functions
-	void CueingTest(DataTheard&);
+	void CueMain(DataTheard&);
+	void ScaleInputData(float* , DataTheard& dth);
 }
 #endif

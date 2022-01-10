@@ -1,5 +1,8 @@
 #pragma once
-//PRECOMPILED HEADER
+/*
+ * PRECOMPILED HEADER
+ *
+ */
 #include <iostream>
 #include <chrono>
 #include <iomanip>//setprecision
