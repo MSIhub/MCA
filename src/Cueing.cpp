@@ -1,25 +1,25 @@
+#include "pch.h"
 #include "Cueing.h"
 
-
-void Cueing::CueingTest(float* MotionData, std::atomic<bool>& isDataRecv, std::mutex& m_mu, std::condition_variable& m_cond)
+void Cueing::CueingTest(DataTheard& dth)
 {
 	while (true)
 	{
-		std::unique_lock<std::mutex> lock(m_mu);
-		while (!isDataRecv)
+		std::unique_lock<std::mutex> lock(dth.mtx);
+		while (!dth.isDataReceived)
 		{
-			m_cond.wait(lock);
+			dth.cond.wait(lock);
 		}
-		if (isDataRecv)
+		if (dth.isDataReceived)
 		{
 			printf("\n");
 			for (int i = 0; i < BUFLEN / 4; i++)
 			{
-				printf("%f, ", MotionData[i]);
+				printf("%f, ", dth.motion_data[i]);
 			}
+			dth.isDataReceived = false;
 		}
-		isDataRecv = false;
 		lock.unlock();
-		std::this_thread::sleep_for(std::chrono::milliseconds(1));
+		std::this_thread::sleep_for(std::chrono::nanoseconds(10));
 	}
 }

@@ -1,8 +1,10 @@
 // MCA.cpp : This file contains the 'main' function. Program execution begins and ends there.
 //
+#include "pch.h"
 #include "UnityServer.h"
 
-void UnityServer::GetInputMotionDataFromUnity(float *MotionData, std::atomic<bool>& isDataRecv, std::mutex& m_mu, std::condition_variable& m_cond)
+
+void UnityServer::GetInputMotionDataFromUnity(DataTheard &dth)
 {
     SOCKET s;
     struct sockaddr_in server, si_other;
@@ -19,22 +21,23 @@ void UnityServer::GetInputMotionDataFromUnity(float *MotionData, std::atomic<boo
     while (true)
     {
         ZeroMemory(buf, BUFLEN); 
-        std::unique_lock<std::mutex> lock(m_mu);                      
+        std::unique_lock<std::mutex> lock(dth.mtx);                      
         //try to receive some data, this is a blocking call
         if ((recv_len = recvfrom(s, buf, BUFLEN, 0, (struct sockaddr*)&si_other, &slen)) == SOCKET_ERROR)
         {
             printf("recvfrom() failed with error code : %d", WSAGetLastError());
-            isDataRecv = false;
+            dth.isDataReceived = false;
             exit(EXIT_FAILURE);
         }       
-        isDataRecv = true;
-        DeserializeRecvData(MotionData, buf);
+        dth.isDataReceived = true;
+        DeserializeRecvData(dth.motion_data, buf);
         lock.unlock();        
-        m_cond.notify_one();
-        std::this_thread::sleep_for(std::chrono::milliseconds(1));
+        dth.cond.notify_one();
+        std::this_thread::sleep_for(std::chrono::nanoseconds(100000));
         /* Give one ms to start the loop again 
             1. To ensure that the lock is not obtained by this theard before triggering the cue theard.
-            2. Fixed update happens every 0.008 seconds [Default has been modified from 0.02s to 0.008s based on the SP7 platform]
+            2. Fixed update happens every 0.02 seconds [50Hz] 
+            [Tested Unity from 0.02s to 0.008s, the computation every 0.008 created significant lag is data piping]
         */
     }
     closesocket(s); //close socket
@@ -62,7 +65,7 @@ void UnityServer::CreateAndPrepareSocket(SOCKET& s, sockaddr_in& server)
     //Prepare the sockaddr_in structure
     server.sin_family = AF_INET;
     server.sin_addr.s_addr = INADDR_ANY;
-    server.sin_port = htons(PORT);
+    server.sin_port = htons(PORT_UNITY);
 }
 
 void UnityServer::InitializeWinsock(WSADATA& wsa)
@@ -87,12 +90,6 @@ void UnityServer::DeserializeRecvData(float* floatArray, char* byteArray)
             itr++;
         }
     }
-
-    /*printf("\n");
-    for (int k = 0; k < BUFLEN / 4; k++)
-    {
-        printf("%f, ", floatArray[k]);
-    }*/
 }
 
 
