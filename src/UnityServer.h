@@ -9,7 +9,7 @@
 namespace UnityServer
 {
 	//function
-	void GetInputMotionDataFromUnity(DataTheard&);
+	void GetInputMotionDataFromUnity(DataThreadUnity&);
 	float BytesToFloat(char, char, char, char);
 	void DeserializeRecvData(float*, char*);
 	void InitializeWinsock(WSADATA& wsa);
