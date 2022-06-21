@@ -19,6 +19,7 @@ void SP7Client::SendDataToSP7(DataThreadSP7& sp7dth)
 		SP7Client::Pose x;
 		SP7Client::Velocity xdot;
 		SP7Client::ExtractMotionData(x, xdot, sp7dth);
+		SP7Client::ExtractMotionData(x, xdot, sp7dth);
 		SP7Client::PackEETargets(x, xdot, dataArray);
 		SP7Client::SendCommand(SP7Client::CtrlCommand::EE_TARGETS, dataArray, s, slen, si_other);
 	}

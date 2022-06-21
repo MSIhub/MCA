@@ -4,6 +4,7 @@
  *
  */
 #include <iostream>
+#include <sstream>// ostringstream for logging
 #include <chrono>
 #include <iomanip>//setprecision
 #include <fstream>//reading files
@@ -11,6 +12,9 @@
 #include <iterator>
 #include <map>
 #include <cstdint>//int header
+#include<math.h>
+#include <ctime>
+
 
 //Multithreading
 #include <thread>
@@ -28,7 +32,7 @@
 #pragma comment(lib, "Ws2_32.lib")
 
 //MACROS: UNITY_SERVER
-#define BUFLEN_UNITY 52
+#define BUFLEN_UNITY 28
 #define PORT_UNITY 23456
 
 //MACROS: SP7_CLIENT
@@ -37,6 +41,11 @@
 #define PORT_SP7 0x4654	//The port on which to listen for incoming data
 #define MAGIC 0x41545353
 
+
+//MACROS: CUEING
+#define KERNEL_LENGTH 4	
+constexpr double M_PI = 3.14159265358979323846;
+constexpr double SP7_ZERO_POSE[6] = { 0.0, 0.0, 0.401, 0.0, 0.0, 0.0 };
 
 //Custom datastructures
 struct DataThreadUnity
